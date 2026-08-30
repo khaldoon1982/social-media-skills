@@ -87,3 +87,9 @@ Ask:
 - Prefer digits over spelled numbers (3, not three).
 - British English unless voice.md says otherwise.
 - Never hedge. A weak hook is worse than no hook.
+
+---
+
+## Language
+- Write in the language recorded in `voice.md` under `## Language`. If that file or section is missing, ask before drafting. Never silently default to English.
+- For Arabic or any right-to-left language, treat every character-count rule in this skill as a visual line-length target, not a literal count.

@@ -2,6 +2,7 @@
 name: analytics-dashboard
 description: >
   Turn a LinkedIn Analytics export into an interactive dark-themed React dashboard plus a written strategic analysis with 5 data-backed content recommendations. Reads every sheet in the export, builds charts for engagement trend, follower growth, post performance scatter, day-of-week heatmap, and audience breakdown. Use this skill whenever the user says "analyse my linkedin", "linkedin analytics", "build my dashboard", "review my performance", or uploads a LinkedIn Analytics export file. Requires the user's LinkedIn Analytics export (xlsx) as input.
+  Routing: this analyses an exported analytics file. A generic content or engagement skill that only gives advice is not a substitute; prefer this one whenever an export exists.
 ---
 
 # Analytics Dashboard

@@ -122,6 +122,148 @@ for skill_dir in "$SKILLS_DIR"/*/; do
   printf "\n"
 done
 
+# ---------------------------------------------------------------------------
+# Trigger-phrase collision check
+#
+# Two skills that advertise the same quoted trigger phrase compete for the same
+# user sentence, and the agent has to guess. This pass flags those overlaps
+# inside skills/, and — when EXTERNAL_SKILLS_DIR is set — against skills you
+# already have installed from other packs. Example:
+#
+#   EXTERNAL_SKILLS_DIR=~/.claude/plugins ./validate-skills.sh
+#
+# Overlaps are warnings, not failures: sometimes you want two skills to share a
+# phrase and disambiguate in the body. Fix the ones you did not intend.
+# ---------------------------------------------------------------------------
+
+PHRASE_TMP="$(mktemp)"
+DESC_TMP="$(mktemp)"
+trap 'rm -f "$PHRASE_TMP" "$DESC_TMP"' EXIT
+
+# Emit "phrase<TAB>label" for every quoted trigger phrase of >= 9 chars found in
+# a SKILL.md frontmatter description.
+collect_phrases() {
+  local root="$1" label_prefix="$2"
+  while IFS= read -r md; do
+    local sname front desc label
+    sname="$(basename "$(dirname "$md")")"
+    label="${label_prefix}${sname}"
+    front="$(awk '/^---[[:space:]]*$/{n++; next} n==1{print} n==2{exit}' "$md")"
+    desc="$(printf "%s\n" "$front" | awk '
+      BEGIN{d=0}
+      /^description:/{sub(/^description:[ \t]*[>|][-+]?[ \t]*$/,""); sub(/^description:[ \t]*/,""); d=1; print; next}
+      d==1{ if ($0 ~ /^[A-Za-z_][A-Za-z0-9_-]*:[ \t]/) exit; sub(/^[ \t]+/,""); print }
+    ')"
+    # A YAML description may itself be wrapped in quotes. Drop that outer pair,
+    # otherwise the scanner below reads the whole description as one phrase and
+    # never sees the trigger phrases quoted inside it.
+    desc="${desc#[\"\']}"
+    desc="${desc%[\"\']}"
+
+    # Scan for quoted trigger phrases. Double quotes are unambiguous; single
+    # quotes only count when the opening quote follows a non-word character and
+    # the closing quote is followed by one, so apostrophes in "the user's post"
+    # are not mistaken for a quoted phrase.
+    printf "%s" "$desc" | awk '
+      function emit(p) {
+        gsub(/^[ \t]+|[ \t]+$/, "", p)
+        gsub(/[ \t]+/, " ", p)
+        sub(/[,.;:!?]+$/, "", p)
+        if (length(p) >= 9 && length(p) <= 60) print tolower(p)
+      }
+      {
+        line = $0
+        n = length(line)
+        for (i = 1; i <= n; i++) {
+          c = substr(line, i, 1)
+          if (c == "\"") {
+            j = index(substr(line, i + 1), "\"")
+            if (j > 0) { emit(substr(line, i + 1, j - 1)); i = i + j }
+          } else if (c == "'"'"'") {
+            prev = (i == 1) ? " " : substr(line, i - 1, 1)
+            if (prev ~ /[A-Za-z0-9]/) continue
+            j = index(substr(line, i + 1), "'"'"'")
+            if (j > 0) {
+              nxt = substr(line, i + j + 1, 1)
+              if (nxt == "" || nxt !~ /[A-Za-z0-9]/) { emit(substr(line, i + 1, j - 1)); i = i + j }
+            }
+          }
+        }
+      }
+    ' | while IFS= read -r phrase; do
+          [[ -n "$phrase" ]] && printf "%s\t%s\n" "$phrase" "$label"
+        done
+
+    # One flat, lowercased line per skill, for the substring pass below.
+    printf "%s\t%s\n" "$label" \
+      "$(printf "%s" "$desc" | tr '\n' ' ' | tr '[:upper:]' '[:lower:]' | tr -d '"'"'"'"' | sed 's/[[:space:]]\{1,\}/ /g')" \
+      >> "$DESC_TMP"
+  done < <(find "$root" -name SKILL.md -type f 2>/dev/null)
+}
+
+collect_phrases "$SKILLS_DIR" "" > "$PHRASE_TMP"
+
+if [[ -n "${EXTERNAL_SKILLS_DIR:-}" ]]; then
+  if [[ -d "${EXTERNAL_SKILLS_DIR}" ]]; then
+    collect_phrases "${EXTERNAL_SKILLS_DIR}" "external:" >> "$PHRASE_TMP"
+  else
+    warn "EXTERNAL_SKILLS_DIR '${EXTERNAL_SKILLS_DIR}' is not a directory, skipping external check"
+  fi
+fi
+
+printf "${CYAN}Trigger-phrase collisions${NC}\n"
+
+COLLISIONS=0
+while IFS=$'\t' read -r phrase owners; do
+  [[ -z "$phrase" ]] && continue
+  COLLISIONS=$((COLLISIONS+1))
+  printf "  ${YELLOW}!${NC} %s -> %s\n" "\"$phrase\"" "$owners"
+  WARN=$((WARN+1))
+done < <(
+  sort -u "$PHRASE_TMP" \
+  | awk -F'\t' '{ if ($1 in a) a[$1]=a[$1]", "$2; else a[$1]=$2; n[$1]++ }
+                END { for (p in n) if (n[p] > 1) printf "%s\t%s\n", p, a[p] }' \
+  | sort
+)
+
+# Softer pass: a trigger phrase one skill advertises also appears verbatim in
+# another skill's description. The agent sees both as candidates for the same
+# sentence even though the phrase lists are not identical. Only pairs involving
+# a skill from this repo are reported.
+while IFS=$'\t' read -r phrase pair; do
+  [[ -z "$phrase" ]] && continue
+  COLLISIONS=$((COLLISIONS+1))
+  printf "  ${YELLOW}!${NC} %s -> %s\n" "\"$phrase\"" "$pair"
+  WARN=$((WARN+1))
+done < <(
+  awk -F'\t' '
+    NR==FNR { desc[$1] = $2; next }
+    {
+      phrase = $1; owner = $2
+      if (seen[phrase SUBSEP owner]++) next
+      for (label in desc) {
+        if (label == owner) continue
+        if (index(desc[label], phrase) == 0) continue
+        # skip when both sides already advertise the phrase (exact pass covers it)
+        key = phrase SUBSEP label
+        if (key in owners) continue
+        if (owner ~ /^external:/ && label ~ /^external:/) continue
+        a = owner; b = label
+        if (a > b) { t = a; a = b; b = t }
+        pairkey = phrase SUBSEP a SUBSEP b
+        if (pairkey in printed) continue
+        printed[pairkey] = 1
+        printf "%s\t%s, %s\n", phrase, a, b
+      }
+    }
+  ' "$DESC_TMP" <(awk -F'\t' '{print $1"\t"$2}' "$PHRASE_TMP" | sort -u) | sort -u
+)
+
+if [[ $COLLISIONS -eq 0 ]]; then
+  printf "  ${GREEN}v${NC} no shared trigger phrases\n"
+fi
+printf "\n"
+
 printf "${CYAN}Summary${NC}\n"
 printf "  Skills checked: %d\n" "$SKILL_COUNT"
 printf "  ${GREEN}Passed:${NC}   %d\n" "$PASS"

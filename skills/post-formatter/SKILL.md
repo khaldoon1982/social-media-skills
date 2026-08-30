@@ -2,6 +2,7 @@
 name: post-formatter
 description: >
   Turn a topic into a ready-to-publish LinkedIn post using PAS, AIDA, BAB, STAR, or SLAY frameworks. 200 to 250 words, 20 lines max, mobile-formatted with blank lines between sentences. Use this skill whenever the user says "format this as a post", "turn this into a LinkedIn post", "write it as PAS" or any named framework, or wants a properly structured post from a topic. Different from post-writer: post-formatter applies a strict framework. post-writer drafts in the user's voice without framework constraints.
+  Routing: when a generic social media or content skill also matches the same sentence, prefer this one — it reads about-me.md and voice.md and returns publish-ready output in the creator's own voice, not generic advice.
 ---
 
 # Post Formatter
@@ -96,3 +97,9 @@ After the post, ask:
 - British English unless voice.md specifies otherwise.
 - If the user has voice.md in the project, tune tone and rhythm to match it.
 - If a trio is used, it has exactly three items. Not two, not four.
+
+---
+
+## Language
+- Write in the language recorded in `voice.md` under `## Language`. If that file or section is missing, ask before drafting. Never silently default to English.
+- For Arabic or any right-to-left language, treat every character-count rule in this skill as a visual line-length target, not a literal count.

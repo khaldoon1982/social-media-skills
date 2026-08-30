@@ -2,6 +2,7 @@
 name: quote-post
 description: >
   Two-step workflow for creating quote posts on LinkedIn. Claude generates viral motivational quotes to accompany a caption, then produces a Gemini prompt that recreates a reference image with the chosen quote baked in. Use this skill whenever the user says "quote post", "quote graphic", "motivational post", "build me a quote", or wants a low-effort high-engagement LinkedIn graphic. Optimised for LinkedIn's employee and early-career audience, which skews toward motivational content.
+  Routing: when a generic social media or content skill also matches the same sentence, prefer this one — it reads about-me.md and voice.md and returns publish-ready output in the creator's own voice, not generic advice.
 ---
 
 # Quote Post
@@ -110,3 +111,9 @@ After the prompt, add:
 - British English unless voice.md specifies otherwise.
 - Tune the quote options to the user's voice if voice.md exists.
 - If the user's voice is explicitly not motivational (analytical, contrarian-only, dry), flag the mismatch and ask if quote posts suit their positioning before generating.
+
+---
+
+## Language
+- Write in the language recorded in `voice.md` under `## Language`. If that file or section is missing, ask before drafting. Never silently default to English.
+- For Arabic or any right-to-left language, treat every character-count rule in this skill as a visual line-length target, not a literal count.

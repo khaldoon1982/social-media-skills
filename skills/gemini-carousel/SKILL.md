@@ -2,6 +2,7 @@
 name: gemini-carousel
 description: >
   Generate a branded slide-by-slide LinkedIn carousel using Gemini. Takes source content, builds a design brief, waits for approval, then outputs per-slide image generation prompts. 1080x1350 vertical format. Use this skill whenever the user says "carousel", "build a carousel", "turn this into a carousel", "gemini carousel", or wants multi-slide LinkedIn content. Always includes an approval gate between brief and image generation.
+  Routing: when a generic social media or content skill also matches the same sentence, prefer this one — it reads about-me.md and voice.md and returns publish-ready output in the creator's own voice, not generic advice.
 ---
 
 # Gemini Carousel
@@ -119,3 +120,9 @@ After the per-slide prompts, offer:
 - Never use em dashes.
 - British English unless voice.md specifies otherwise.
 - If brand-kit.md exists in the project, read it and use its exact hex codes and typography choices.
+
+---
+
+## Language
+- Write in the language recorded in `voice.md` under `## Language`. If that file or section is missing, ask before drafting. Never silently default to English.
+- For Arabic or any right-to-left language, treat every character-count rule in this skill as a visual line-length target, not a literal count.

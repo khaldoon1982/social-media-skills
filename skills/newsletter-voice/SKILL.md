@@ -170,3 +170,9 @@ One file in the project root:
 - Do not produce a separate voice or banned-words file. Absence patterns live inside newsletter-voice.md as a single section.
 - British English throughout unless samples are clearly American.
 - Never use em dashes in any output file or in any draft.
+
+---
+
+## Language
+- Write in the language recorded in `voice.md` under `## Language`. If that file or section is missing, ask before drafting. Never silently default to English.
+- For Arabic or any right-to-left language, treat every character-count rule in this skill as a visual line-length target, not a literal count.
