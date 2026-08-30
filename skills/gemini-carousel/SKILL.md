@@ -119,3 +119,9 @@ After the per-slide prompts, offer:
 - Never use em dashes.
 - British English unless voice.md specifies otherwise.
 - If brand-kit.md exists in the project, read it and use its exact hex codes and typography choices.
+
+---
+
+## Language
+- Write in the language recorded in `voice.md` under `## Language`. If that file or section is missing, ask before drafting. Never silently default to English.
+- For Arabic or any right-to-left language, treat every character-count rule in this skill as a visual line-length target, not a literal count.

@@ -142,6 +142,16 @@ Create about-me.md in the project root. Use this structure:
 
 Keep it under 300 words. Every line should be something Claude would reference when writing.
 
+## Step 2b. Establish the publishing language
+
+Before asking for samples, settle the language. Do not assume English.
+
+- If the answers so far, the project files, or the user's own messages are in another language, ask directly: which language do you publish in, and are there others?
+- If they publish in more than one, ask which channel gets which. A creator posting Dutch on LinkedIn and Arabic on Instagram needs both recorded, not an average.
+- For right-to-left languages, note it. Line-length and formatting rules in the other skills are tuned to Latin script and need visual, not literal, character counts.
+
+Record the answer in voice.md under `## Language`. Analyse samples in their own language; never translate a sample before analysing it, because translation destroys the rhythm you are trying to capture.
+
 ## Step 3. Ask for the samples
 
 Say this:
@@ -188,6 +198,9 @@ Create voice.md in the project root. This is a single integrated profile coverin
 
 ```
 # Voice Profile
+
+## Language
+[Primary publishing language, plus any secondary languages and when each is used. Record the spelling convention (e.g. British English, Dutch, Modern Standard Arabic) and, for multilingual creators, which channels get which language. Every other skill writes in the language named here.]
 
 ## Who I sound like
 [2 to 3 sentences describing the overall voice in plain language]
@@ -253,6 +266,7 @@ Two files in the project root:
 - If samples contradict each other, note the contradiction in voice.md rather than smoothing it over.
 - Keep about-me.md under 300 words.
 - Keep voice.md under 500 words.
+- Never write voice.md in a different language from the one the user publishes in. The profile describes the voice; it must be readable in the voice's own language.
 - British English throughout unless the samples are clearly American.
 - Never use em dashes in any output file or in any draft.
 - Do not produce an voice.md file. Absence signals live inside voice.md.

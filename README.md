@@ -114,6 +114,52 @@ Then reference skills from `.agents/social-media-skills/skills/`.
 
 Fork the repo, swap the voice rules for your own, and clone your fork into your projects.
 
+## Avoiding conflicts with other skill packs
+
+These 17 skills are specialised. Generic marketing or content packs advertise the
+same sentences ("write a LinkedIn post", "what should I post", "LinkedIn carousel"),
+and when two skills claim one sentence the agent has to guess which you meant.
+
+Check before you hit that in practice:
+
+```bash
+# collisions inside this repo only
+./validate-skills.sh
+
+# collisions against everything you already have installed
+EXTERNAL_SKILLS_DIR=~/.claude/plugins ./validate-skills.sh
+EXTERNAL_SKILLS_DIR=~/.claude/skills  ./validate-skills.sh
+```
+
+Read the output like this:
+
+- **Two skills from this repo sharing a phrase** is usually fine. They are one
+  pipeline and the bodies disambiguate (post-writer drafts in your voice,
+  post-formatter applies a named framework).
+- **A `external:` pair is the one to act on.** Either disable the generic skill,
+  or add a routing line to the description of whichever should win.
+
+The most common clash is a general-purpose `social-content` skill, which claims
+"LinkedIn post", "LinkedIn carousel" and "what should I post" on its own. If you
+run these 17, turn that one off: every skill here reads `voice.md` and produces
+a sharper result than a generic equivalent can.
+
+## Environment variables
+
+15 of the 17 skills need no credentials. Copy `.env.example` to `.env` for the two
+that do:
+
+```bash
+cp .env.example .env
+```
+
+| Variable | Needed by | Where to get it |
+|---|---|---|
+| `APIFY_API_TOKEN` | reels-scripting, post-scorer | console.apify.com → Settings → Integrations |
+| `GOOGLE_AI_API_KEY` | reels-scripting | aistudio.google.com/apikey |
+
+`niche-research` needs no key but does need the Claude for Chrome extension enabled.
+
 ## Usage
 
 Run `voice-builder` first. Every other skill needs `about-me.md` and `voice.md` to work properly.

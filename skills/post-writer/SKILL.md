@@ -128,3 +128,9 @@ Then say:
 - Do not add engagement bait CTAs unless they appear in voice.md.
 - Keep posts between 150 and 300 words unless the user requests otherwise.
 - Plan before writing. Never skip Step 2.
+
+---
+
+## Language
+- Write in the language recorded in `voice.md` under `## Language`. If that file or section is missing, ask before drafting. Never silently default to English.
+- For Arabic or any right-to-left language, treat every character-count rule in this skill as a visual line-length target, not a literal count.

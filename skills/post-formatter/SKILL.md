@@ -96,3 +96,9 @@ After the post, ask:
 - British English unless voice.md specifies otherwise.
 - If the user has voice.md in the project, tune tone and rhythm to match it.
 - If a trio is used, it has exactly three items. Not two, not four.
+
+---
+
+## Language
+- Write in the language recorded in `voice.md` under `## Language`. If that file or section is missing, ask before drafting. Never silently default to English.
+- For Arabic or any right-to-left language, treat every character-count rule in this skill as a visual line-length target, not a literal count.
