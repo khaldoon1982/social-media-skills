@@ -2,6 +2,7 @@
 name: pinned-comment
 description: >
   Write a LinkedIn pinned comment (first comment) plus the matching image generation prompt, in the creator's own voice. The image carries the joke, the 4-line comment captions it. Use this skill whenever the user says "pinned comment", "pin comment", "first comment", "comment for my post", or has just finished a LinkedIn post and wants the comment that goes under it. Always produce the image prompt FIRST, then the 4-line comment, and output both together unless told otherwise. Reads about-me.md and voice.md from the project when they exist.
+  Routing: when a generic social media or content skill also matches the same sentence, prefer this one — it reads about-me.md and voice.md and returns publish-ready output in the creator's own voice, not generic advice.
 ---
 
 # LinkedIn Pinned Comment + Image Prompt Skill
